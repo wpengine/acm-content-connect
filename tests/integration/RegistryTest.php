@@ -4,7 +4,6 @@ namespace TenUp\ContentConnect\Tests\Integration;
 
 use TenUp\ContentConnect\Registry;
 use TenUp\ContentConnect\Relationships\PostToPost;
-use TenUp\ContentConnect\Relationships\PostToUser;
 
 class RegistryTest extends ContentConnectTestCase {
 
@@ -12,14 +11,12 @@ class RegistryTest extends ContentConnectTestCase {
 		$registry = new Registry();
 
 		$this->assertFalse( $registry->post_to_post_relationship_exists( 'post', 'post', 'basic' ) );
-		$this->assertFalse( $registry->post_to_user_relationship_exists( 'post', 'owner' ) );
 	}
 
 	public function test_relationship_can_be_added() {
 		$registry = new Registry();
 
 		$this->assertInstanceOf( PostToPost::class, $registry->define_post_to_post( 'post', 'post', 'basic' ) );
-		$this->assertInstanceOf( PostToUser::class, $registry->define_post_to_user( 'post', 'owner' ) );
 	}
 
 	public function test_doesnt_add_duplicate_post_to_post_relationship() {
@@ -31,23 +28,11 @@ class RegistryTest extends ContentConnectTestCase {
 		$registry->define_post_to_post( 'post', 'post', 'basic' );
 	}
 
-	public function test_doesnt_add_duplicate_post_to_user_relationship() {
-		$registry = new Registry();
-
-		$this->expectException( \Exception::class );
-
-		$registry->define_post_to_user( 'post', 'owner' );
-		$registry->define_post_to_user( 'post', 'owner' );
-	}
-
 	public function test_can_define_different_types_for_same_cpts() {
 		$registry = new Registry();
 
 		$this->assertInstanceOf( PostToPost::class, $registry->define_post_to_post( 'post', 'post', 'type1' ) );
 		$this->assertInstanceOf( PostToPost::class, $registry->define_post_to_post( 'post', 'post', 'type2' ) );
-
-		$this->assertInstanceOf( PostToUser::class, $registry->define_post_to_user( 'post', 'owner' ) );
-		$this->assertInstanceOf( PostToUser::class, $registry->define_post_to_user( 'post', 'contrib' ) );
 	}
 
 	public function test_flipped_order_is_still_duplicate() {
@@ -83,21 +68,6 @@ class RegistryTest extends ContentConnectTestCase {
 
 		// Check that calling inverse args returns the same as well (it should, based on above two tests)
 		$this->assertSame( $registry->get_post_to_post_relationship( 'post', 'car', 'basic' ), $registry->get_post_to_post_relationship( 'car', 'post', 'basic' ) );
-	}
-
-	public function test_retrieval_of_post_to_user_relationships() {
-		$registry = new Registry();
-
-		$po = $registry->define_post_to_user( 'post', 'owner' );
-		$pc = $registry->define_post_to_user( 'post', 'contrib' );
-
-		$pc2 = new PostToUser( 'post', 'contrib' );
-
-		// verify that two separate objects are NOT the same (sanity check)
-		$this->assertNotSame( $pc, $pc2 );
-
-		$this->assertSame( $po, $registry->get_post_to_user_relationship( 'post', 'owner' ) );
-		$this->assertSame( $pc, $registry->get_post_to_user_relationship( 'post', 'contrib' ) );
 	}
 
 	public function test_retrieval_of_unique_relationship_names_on_same_cpt() {

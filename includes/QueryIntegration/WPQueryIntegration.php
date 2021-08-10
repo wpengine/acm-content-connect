@@ -3,7 +3,6 @@
 namespace TenUp\ContentConnect\QueryIntegration;
 
 use TenUp\ContentConnect\Relationships\PostToPost;
-use TenUp\ContentConnect\Relationships\PostToUser;
 
 class WPQueryIntegration {
 
@@ -74,8 +73,6 @@ class WPQueryIntegration {
 		// other side of the relationship
 		if ( $relationship instanceof PostToPost ) {
 			$orderby = "p2p1.order = 0, p2p1.order ASC";
-		} else if ( $relationship instanceof  PostToUser ) {
-			$orderby = "p2u1.post_order = 0, p2u1.post_order ASC";
 		}
 
 		return $orderby;

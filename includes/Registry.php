@@ -3,7 +3,6 @@
 namespace TenUp\ContentConnect;
 
 use TenUp\ContentConnect\Relationships\PostToPost;
-use TenUp\ContentConnect\Relationships\PostToUser;
 use TenUp\ContentConnect\Relationships\Relationship;
 
 /**
@@ -12,8 +11,6 @@ use TenUp\ContentConnect\Relationships\Relationship;
 class Registry {
 
 	protected $post_post_relationships = array();
-
-	protected $post_user_relationships = array();
 
 	public function setup() {}
 
@@ -119,69 +116,6 @@ class Registry {
 		$this->post_post_relationships[ $key ]->setup();
 
 		return $this->post_post_relationships[ $key ];
-	}
-
-	/* POST TO USER RELATIONSHIPS */
-
-	/**
-	 * Checks if a relationship exists between a post type and users
-	 *
-	 * @param string $post_type
-	 * @param string $name
-	 *
-	 * @return bool
-	 */
-	public function post_to_user_relationship_exists( $post_type, $name ) {
-		$relationship = $this->get_post_to_user_relationship( $post_type, $name );
-
-		if ( ! $relationship ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	public function get_post_to_user_relationship_by_key( $key ) {
-		if ( isset( $this->post_user_relationships[ $key ] ) ) {
-			return $this->post_user_relationships[ $key ];
-		}
-
-		return false;
-	}
-
-	/**
-	 * Returns the relationship object between users and the post type provided.
-	 *
-	 * @param string $post_type
-	 * @param string $name
-	 */
-	public function get_post_to_user_relationship( $post_type, $name ) {
-		$key = $this->get_relationship_key( $post_type, 'user', $name );
-
-		return $this->get_post_to_user_relationship_by_key( $key );
-	}
-
-	/**
-	 * Defines a new many to many relationship between users and a post type
-	 *
-	 * @param string $post_type
-	 * @param string $name
-	 * @param array $args
-	 *
-	 * @return mixed
-	 * @throws \Exception
-	 */
-	public function define_post_to_user( $post_type, $name, $args = array() ) {
-		if ( $this->post_to_user_relationship_exists( $post_type, $name ) ) {
-			throw new \Exception( "A relationship already exists between users and post type {$post_type} named {$name}" );
-		}
-
-		$key = $this->get_relationship_key( $post_type, 'user', $name );
-
-		$this->post_user_relationships[ $key ] = new PostToUser( $post_type, $name, $args );
-		$this->post_user_relationships[ $key ]->setup();
-
-		return $this->post_user_relationships[ $key ];
 	}
 
 }

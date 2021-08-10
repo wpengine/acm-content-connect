@@ -3,12 +3,9 @@
 namespace TenUp\ContentConnect;
 
 use TenUp\ContentConnect\API\Search;
-use TenUp\ContentConnect\QueryIntegration\UserQueryIntegration;
 use TenUp\ContentConnect\QueryIntegration\WPQueryIntegration;
 use TenUp\ContentConnect\Relationships\DeletedItems;
 use TenUp\ContentConnect\Tables\PostToPost;
-use TenUp\ContentConnect\Tables\PostToUser;
-use TenUp\ContentConnect\UI\MetaBox;
 
 class Plugin {
 
@@ -42,16 +39,6 @@ class Plugin {
 	 * @var WPQueryIntegration
 	 */
 	public $wp_query_integration;
-
-	/**
-	 * @var UserQueryIntegration
-	 */
-	public $user_query_integration;
-
-	/**
-	 * @var MetaBox
-	 */
-	public $meta_box;
 
 	/**
 	 * @var Search
@@ -98,12 +85,6 @@ class Plugin {
 		$this->wp_query_integration = new WPQueryIntegration();
 		$this->wp_query_integration->setup();
 
-		$this->user_query_integration = new UserQueryIntegration();
-		$this->user_query_integration->setup();
-
-		$this->meta_box = new MetaBox();
-		$this->meta_box->setup();
-
 		$this->search = new Search();
 		$this->search->setup();
 
@@ -120,9 +101,6 @@ class Plugin {
 	public function register_tables() {
 		$this->tables['p2p'] = new PostToPost();
 		$this->tables['p2p']->setup();
-
-		$this->tables['p2u'] = new PostToUser();
-		$this->tables['p2u']->setup();
 	}
 
 }

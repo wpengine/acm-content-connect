@@ -4,7 +4,6 @@ namespace TenUp\ContentConnect\QueryIntegration;
 
 use TenUp\ContentConnect\Plugin;
 use TenUp\ContentConnect\Relationships\PostToPost;
-use TenUp\ContentConnect\Relationships\PostToUser;
 
 class RelationshipQuery{
 
@@ -54,15 +53,6 @@ class RelationshipQuery{
 	 */
 	protected $p2p_join = false;
 
-	/**
-	 * Have we already joined the p2u table?
-	 *
-	 * on an "OR" relation, we don't need a join for each clause, so this enables us to track that
-	 *
-	 * @var bool
-	 */
-	protected $p2u_join = false;
-
 	public function __construct( $relationship_query, $post_type = '' ) {
 		$this->relationship_query = $relationship_query;
 		$this->post_type = ! empty( $post_type ) ? $post_type : 'post';
@@ -89,7 +79,6 @@ class RelationshipQuery{
 		// Check for any top level keys that should be moved into a nested segment
 		$valid_keys = array(
 			'related_to_post',
-			'related_to_user',
 			'name',
 		);
 		$new_segment = array();
@@ -124,12 +113,7 @@ class RelationshipQuery{
 	 * @return bool
 	 */
 	public function is_valid_segment( $segment ) {
-		// Not allowed to have user AND post on the same segment
-		if ( isset( $segment['related_to_post'] ) && isset( $segment['related_to_user'] ) ) {
-			return false;
-		}
-
-		if ( ( isset( $segment['related_to_post'] ) || isset( $segment['related_to_user'] ) ) && isset( $segment['name'] ) ) {
+		if ( isset( $segment['related_to_post'] ) && isset( $segment['name'] ) ) {
 			return true;
 		}
 
@@ -169,8 +153,6 @@ class RelationshipQuery{
 			if ( $relationship = $this->get_relationship_for_segment( $segment ) ) {
 				if ( $relationship instanceof PostToPost ) {
 					$where_parts[] = $wpdb->prepare( "(p2p{$wherecount}.id2 = %d and p2p{$wherecount}.name = %s)", $segment['related_to_post'], $segment['name'] );
-				} else if ( $relationship instanceof PostToUser ) {
-					$where_parts[] = $wpdb->prepare( "(p2u{$wherecount}.user_id = %d and p2u{$wherecount}.name = %s)", $segment['related_to_user'], $segment['name'] );
 				}
 
 				// Only increment counter no "AND" relations, when we are joining a table for each segment
@@ -208,13 +190,6 @@ class RelationshipQuery{
 						// Track that we've joined the p2p table
 						$this->p2p_join = true;
 					}
-				} else if ( $relationship instanceof PostToUser ) {
-					if ( $this->relation === 'AND' || $this->p2u_join === false ) {
-						$join_parts[] = " left join {$wpdb->prefix}post_to_user as p2u{$joincount} on {$wpdb->posts}.ID = p2u{$joincount}.post_id";
-
-						// Track that we've joined the p2u table
-						$this->p2u_join = true;
-					}
 				}
 
 				// Only increment counter no "AND" relations, when we are joining a table for each segment
@@ -238,23 +213,13 @@ class RelationshipQuery{
 
 		$registry = Plugin::instance()->get_registry();
 
-		if ( isset( $segment['related_to_post'] ) ) {
-			$related_to_post = get_post( $segment['related_to_post'] );
+		$related_to_post = get_post( $segment['related_to_post'] );
 
-			if ( ! $related_to_post ) {
-				return false;
-			}
-
-			$relationship = $registry->get_post_to_post_relationship( $this->post_type, $related_to_post->post_type, $segment['name'] );
-		} else {
-			$related_to_user = get_user_by( 'id', $segment['related_to_user'] );
-
-			if ( ! $related_to_user ) {
-				return false;
-			}
-
-			$relationship = $registry->get_post_to_user_relationship( $this->post_type, $segment['name'] );
+		if ( ! $related_to_post ) {
+			return false;
 		}
+
+		$relationship = $registry->get_post_to_post_relationship( $this->post_type, $related_to_post->post_type, $segment['name'] );
 
 		return $relationship;
 	}

@@ -9,7 +9,11 @@ if ( ! $_tests_dir ) {
 require_once $_tests_dir . '/includes/functions.php';
 
 function _manually_load_plugin() {
-	require dirname(__FILE__ ) . '/../../content-connect.php';
+	require_once dirname(__FILE__) . '/../../autoload.php';
+	wp_content_connect_autoloader();
+
+	// Kick things off
+	\TenUp\ContentConnect\Plugin::instance();
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
