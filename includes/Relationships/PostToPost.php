@@ -142,14 +142,24 @@ class PostToPost extends Relationship {
 		$table = Plugin::instance()->get_table( 'p2p' );
 
 		if ( $this->can_relate_post_ids( $pid1, $pid2 ) ) {
-			$table->delete(
-				array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
-				array( '%d', '%d', '%s' )
-			);
+			// For one way relationships, $pid1 must be the "from" post type.
+			if ( ! $this->is_bidirectional && get_post_type( $pid1 ) !== $this->from ) {
+				$tmp = $pid2;
+				$pid2 = $pid1;
+				$pid1 = $tmp;
+			}
+
 			$table->delete(
 				array( 'id1' => $pid2, 'id2' => $pid1, 'name' => $this->name ),
 				array( '%d', '%d', '%s' )
 			);
+
+			if ( $this->is_bidirectional ) {
+				$table->delete(
+					array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
+					array( '%d', '%d', '%s' )
+				);
+			}
 		}
 
 		/**
