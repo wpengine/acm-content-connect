@@ -96,14 +96,16 @@ class PostToPost extends Relationship {
 		/** @var \TenUp\ContentConnect\Tables\PostToPost $table */
 		$table = Plugin::instance()->get_table( 'p2p' );
 
-		$table->replace(
-			array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
-			array( '%d', '%d', '%s' )
-		);
-		$table->replace(
-			array( 'id1' => $pid2, 'id2' => $pid1, 'name' => $this->name ),
-			array( '%d', '%d', '%s' )
-		);
+		if ( $this->can_relate_post_ids( $pid1, $pid2 ) ) {
+			$table->replace(
+				array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
+				array( '%d', '%d', '%s' )
+			);
+			$table->replace(
+				array( 'id1' => $pid2, 'id2' => $pid1, 'name' => $this->name ),
+				array( '%d', '%d', '%s' )
+			);
+		}
 
 		/**
 		 * Fires after a relationship has been added
@@ -121,14 +123,16 @@ class PostToPost extends Relationship {
 		/** @var \TenUp\ContentConnect\Tables\PostToPost $table */
 		$table = Plugin::instance()->get_table( 'p2p' );
 
-		$table->delete(
-			array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
-			array( '%d', '%d', '%s' )
-		);
-		$table->delete(
-			array( 'id1' => $pid2, 'id2' => $pid1, 'name' => $this->name ),
-			array( '%d', '%d', '%s' )
-		);
+		if ( $this->can_relate_post_ids( $pid1, $pid2 ) ) {
+			$table->delete(
+				array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
+				array( '%d', '%d', '%s' )
+			);
+			$table->delete(
+				array( 'id1' => $pid2, 'id2' => $pid1, 'name' => $this->name ),
+				array( '%d', '%d', '%s' )
+			);
+		}
 
 		/**
 		 * Fires after a relationship has been deleted
@@ -216,6 +220,29 @@ class PostToPost extends Relationship {
 		/** @var \TenUp\ContentConnect\Tables\PostToPost $table */
 		$table = Plugin::instance()->get_table( 'p2p' );
 		$table->replace_bulk( $fields, $data );
+	}
+
+	/**
+	 * Test the post types of two post IDs to make sure they belong to this
+	 * relationship.
+	 *
+	 * @param int $pid1 A post ID.
+	 * @param int $pid2 A second post ID.
+	 * @return boolean True if both IDs represent post types that belong to the
+	 *                 relationship.
+	 */
+	public function can_relate_post_ids( $pid1, $pid2 ) {
+		$ids = [ $pid1, $pid2 ];
+
+		foreach ( $ids as $id ) {
+			$post_type = get_post_type( $id );
+
+			if ( $post_type !== $this->from && ! in_array( $post_type, $this->to ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 }
