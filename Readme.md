@@ -82,7 +82,11 @@ This method defines a post to post relationship between two post types, `$from` 
 
 #### Args:
 
-Args expects options for the `from` and `to` sides of the relationship as top level keys. Options for each direction are as follows:
+Optional.
+
+`is_bidirectional` (Boolean) Should this relationship be queryable from either side of the relationship? Defaults to `false`.
+
+You may also supply arguments for each side of the relationship through the `from` and `to` top level keys. Options for each direction are as follows:
 
 - `enable_ui` (Bool) - Should the default UI be enabled for the current side of this relationship
 - `sortable` (Bool) - Should the relationship be sortable for the current side of this relationship
@@ -97,6 +101,7 @@ Example:
 ```php
 function my_define_relationships( $registry ) {
     $args = array(
+        'is_bidirectional' => true,
         'from' => array(
             'enable_ui' => true,
             'sortable' => true,

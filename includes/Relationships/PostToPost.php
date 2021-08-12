@@ -16,7 +16,7 @@ class PostToPost extends Relationship {
 	/**
 	 * CPT Name of the second post type in the relationship
 	 *
-	 * @var string
+	 * @var string|array
 	 */
 	public $to;
 
@@ -35,6 +35,10 @@ class PostToPost extends Relationship {
 		$this->from = $from;
 		$this->to = $to;
 		$this->id = strtolower( get_class( $this ) ) . "-{$name}-{$from}-" . implode( '.', $to );
+
+		if ( $from === $to ) {
+			$args['is_bidirectional'] = true;
+		}
 		
 		parent::__construct( $name, $args );
 	}
@@ -97,14 +101,18 @@ class PostToPost extends Relationship {
 		$table = Plugin::instance()->get_table( 'p2p' );
 
 		if ( $this->can_relate_post_ids( $pid1, $pid2 ) ) {
-			$table->replace(
-				array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
-				array( '%d', '%d', '%s' )
-			);
+			// Swap the from/to ids because one way queries will join $pid1 on the "to" post type.
 			$table->replace(
 				array( 'id1' => $pid2, 'id2' => $pid1, 'name' => $this->name ),
 				array( '%d', '%d', '%s' )
 			);
+
+			if ( $this->is_bidirectional ) {
+				$table->replace(
+					array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
+					array( '%d', '%d', '%s' )
+				);
+			}
 		}
 
 		/**

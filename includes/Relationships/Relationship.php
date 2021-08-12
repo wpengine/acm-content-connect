@@ -62,10 +62,18 @@ abstract class Relationship {
 	 */
 	public $to_sortable;
 
+	/**
+	 * Is this a two way relationship?
+	 *
+	 * @var bool
+	 */
+	public $is_bidirectional;
+
 	public function __construct( $name, $args = array() ) {
 		$this->name = $name;
 
 		$defaults = array(
+			'is_bidirectional' => false,
 			'from' => array(
 				'enable_ui' => true,
 				'sortable' => false,
@@ -83,6 +91,8 @@ abstract class Relationship {
 		);
 
 		$args = array_replace_recursive( $defaults, $args );
+
+		$this->is_bidirectional = $args['is_bidirectional'];
 
 		$this->enable_from_ui = $args['from']['enable_ui'];
 		$this->from_sortable = $args['from']['sortable'];
