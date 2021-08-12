@@ -65,7 +65,8 @@ class Registry {
 	}
 
 	/**
-	 * Returns the relationship object for the post types provided. Order of CPT args is unimportant.
+	 * Returns the relationship object for the post types provided. Order of CPT args is only important
+	 * for one way relationships, where the first argument must be the "from" post type.
 	 *
 	 * @param string $cpt1
 	 * @param string $cpt2
@@ -78,7 +79,7 @@ class Registry {
 
 		$relationship = $this->get_post_to_post_relationship_by_key( $key );
 
-		if ( $relationship ) {
+		if ( $relationship && ( $relationship->is_bidirectional || $relationship->from === $cpt1 ) ) {
 			return $relationship;
 		}
 
@@ -90,7 +91,11 @@ class Registry {
 
 		$relationship = $this->get_post_to_post_relationship_by_key( $key );
 
-		return $relationship;
+		if ( $relationship && $relationship->is_bidirectional ) {
+			return $relationship;
+		}
+
+		return false;
 	}
 
 	/**
