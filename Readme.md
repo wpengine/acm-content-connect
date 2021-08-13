@@ -6,19 +6,17 @@
 
 ## Installation and Usage
 
-WP Content Connect can be used as a plugin or a standalone library. The easiest way to use this is to install as a plugin and activate.
-
 ### Composer install
 
-#### As a library
-
-First, require this repository using the command line:
-
-`$ composer require 10up/wp-content-connect`
-
-or directly in `composer.json`:
+First, require this repository directly in `composer.json`:
 
 ```
+  "repositories": [
+      {
+          "type": "vcs",
+          "url": "https://github.com/apmatthews/wp-content-connect.git"
+      }
+  ],
   "require": {
     "10up/wp-content-connect": "^1.5.0"
   }
@@ -26,46 +24,9 @@ or directly in `composer.json`:
 
 This will install WP Content Connect to your `vendor` folder and allow you to to use it as a library by calling `\TenUp\ContentConnect\Plugin::instance();` from your code.
 
-#### As a plugin
-
-Alternatively, if you prefer to have composer install it as a plugin, you may redeclare this package in your `composer.json` using the following example:
-
-```
-{
-  "name": "your project name",
-  "repositories": [
-    {
-      "type": "package",
-      "package": {
-        "name": "10up/wp-content-connect",
-        "type": "wordpress-plugin",
-        "version": "1.5.0",
-        "source": {
-          "url": "https://github.com/10up/wp-content-connect.git",
-          "type": "git",
-          "reference": "1.5.0"
-        }
-      }
-    }
-  ],
-  "require": {
-    "10up/wp-content-connect": "^1.5",
-    "composer/installers": "^1.7"
-  },
-  "extra": {
-    "installer-paths": {
-      "plugins/wp-content-connect/": [
-        "10up/wp-content-connect"
-      ]
-    }
-  }
-}
-
-```
-
 
 ## Defining Relationships
-Relationships can be defined once any post types they utilize are defined by hooking into the `tenup-content-connect-init` action. This action is fired on the WordPress `init` action, at priority 100, so any post types must be registered prior to this. Currently supported relationships are post-to-post. Additionally, when registering a relationship, you must specify a `name`. Name enables multiple distinct relationships between the same object types. For instance, you could have a relationship for post type `post` with a type of `researchers` to indicate that any entry in the "researcher" relationship is a researcher for the post and have another relationship defined for post type `post` with a name of `backer` to indicate that any entry in the "backer" relationship contributes financially to the post.
+Relationships can be defined once any post types they utilize are defined by hooking into the `tenup-content-connect-init` action. This action is fired on the WordPress `init` action, at priority 100, so any post types must be registered prior to this. Additionally, when registering a relationship, you must specify a `name`. Name enables multiple distinct relationships between the same object types. For instance, you could have a relationship for post type `post` with a type of `researchers` to indicate that any entry in the "researcher" relationship is a researcher for the post and have another relationship defined for post type `post` with a name of `backer` to indicate that any entry in the "backer" relationship contributes financially to the post.
 
 ### `define_post_to_post( $from, $to, $name, $args = array() )`
 This method defines a post to post relationship between two post types, `$from` and `$to`.
@@ -198,9 +159,9 @@ while this will not work (orderby will be ignored):
 'orderby' => 'relationship',
 ```
 
-## Manually Managing Relationships
+## Managing Relationships
 
-If you choose to not use the built in UIs for relationships, you'll need to manually update relationships. **DO NOT** try and work directly with the database tables. Instead, work with the following API methods. The underlying implementations may need to change from time to time, but the following methods should continue to function if the underlying implementations need to change.
+**DO NOT** try and work directly with the database tables. Instead, work with the following API methods. The underlying implementations may need to change from time to time, but the following methods should continue to function if the underlying implementations need to change.
 
 These methods are available on the relationship objects returned when defining the relationship. Make sure to call these methods on the specific relationship object you are defining a relationship for, as these methods are specific to the relationship context (they are aware of the `name` of the relationship, as well as the post types in the relationship).
 
@@ -208,7 +169,8 @@ If you don't already have a relationship object, you can get one from the regist
 `Registry->get_post_to_post_relationship()`.
 
 ### `Registry->get_post_to_post_relationship( $cpt1, $cpt2, $name )`
-Returns the relationship object between the two post types with the provided name.
+Returns the relationship object between the two post types with the provided name. For one way relationships, post type
+argument order must match the order was used to define the relationship.
 
 #### Parameters:
 
