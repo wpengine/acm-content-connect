@@ -56,7 +56,7 @@ class Search {
 	public function process_search( $request ) {
 		$object_type = $request->get_param( 'object_type' );
 
-		if ( ! in_array( $object_type, array( 'post', 'user' ) ) ) {
+		if ( ! in_array( $object_type, array( 'post' ) ) ) {
 			return array();
 		}
 
@@ -83,56 +83,7 @@ class Search {
 			'current_post_id'   => intval( $request->get_param( 'current_post_id' ) ),
 		);
 
-		switch( $object_type ) {
-			case 'user':
-				$results = $this->search_users( $search_text, $search_args );
-				break;
-			case 'post':
-				$results = $this->search_posts( $search_text, $final_post_types, $search_args );
-				break;
-		}
-
-		return $results;
-	}
-
-	public function search_users( $search_text, $args = array() ) {
-
-		$defaults = array(
-			'paged' => 1,
-		);
-
-		$args = wp_parse_args( $args, $defaults );
-
-		$query_args = array(
-			'search' => "*{$search_text}*",
-			'paged'  => $args['paged'],
-		);
-
-		/**
-		 * Filters the search users query args.
-		 *
-		 * @since  1.5.0
-		 * @param  array $query_args The \WP_Query args.
-		 * @param  array $args       Optional. The search users args. Default empty.
-		 * @return array
-		 */
-		$query_args = apply_filters( 'tenup_content_connect_search_users_query_args', $query_args, $args );
-		$query      = new \WP_User_Query( $query_args );
-
-		// @todo pagination args
-		$results = array(
-			'prev_pages' => false,
-			'more_pages' => false,
-			'data' => array(),
-		);
-
-		// Normalize Formatting
-		foreach( $query->get_results() as $user ) {
-			$results['data'][] = array(
-				'ID' => $user->ID,
-				'name' => $user->display_name,
-			);
-		}
+		$results = $this->search_posts( $search_text, $final_post_types, $search_args );
 
 		return $results;
 	}

@@ -16,23 +16,9 @@ class PostToPost extends Relationship {
 	/**
 	 * CPT Name of the second post type in the relationship
 	 *
-	 * @var string
+	 * @var string|array
 	 */
 	public $to;
-
-	/**
-	 * The UI Object for the "from" portion of the relationship, if the from UI is enabled
-	 *
-	 * @var \TenUp\ContentConnect\UI\PostToPost
-	 */
-	public $from_ui;
-
-	/**
-	 * The UI Object for the "to" portion of the relationship, if the to UI is enabled
-	 *
-	 * @var \TenUp\ContentConnect\UI\PostToPost
-	 */
-	public $to_ui;
 
 	public function __construct( $from, $to, $name, $args = array() ) {
 		if ( ! post_type_exists( $from ) ) {
@@ -49,26 +35,15 @@ class PostToPost extends Relationship {
 		$this->from = $from;
 		$this->to = $to;
 		$this->id = strtolower( get_class( $this ) ) . "-{$name}-{$from}-" . implode( '.', $to );
+
+		if ( $from === $to ) {
+			$args['is_bidirectional'] = true;
+		}
 		
 		parent::__construct( $name, $args );
 	}
 
-	public function setup() {
-		if ( $this->enable_from_ui === true ) {
-			$this->from_ui = new \TenUp\ContentConnect\UI\PostToPost( $this, $this->from, $this->from_labels, $this->from_sortable );
-			$this->from_ui->setup();
-		}
-
-		// Make sure CPT is not the same as "from" so we don't get a duplicate, then register if enabled
-		if ( $this->to !== $this->from && $this->enable_to_ui === true ) {
-			// Currently, only support a default UI when the "to" end is a single post type
-			if ( count( $this->to ) === 1 ) {
-				$this->to_ui = new \TenUp\ContentConnect\UI\PostToPost( $this, $this->to[0], $this->to_labels, $this->to_sortable );
-				$this->to_ui->setup();
-			}
-		}
-
-	}
+	public function setup() {}
 
 	/**
 	 * Gets the IDs that are related to the supplied post ID in the context of the current relationship
@@ -125,14 +100,30 @@ class PostToPost extends Relationship {
 		/** @var \TenUp\ContentConnect\Tables\PostToPost $table */
 		$table = Plugin::instance()->get_table( 'p2p' );
 
-		$table->replace(
-			array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
-			array( '%d', '%d', '%s' )
-		);
-		$table->replace(
-			array( 'id1' => $pid2, 'id2' => $pid1, 'name' => $this->name ),
-			array( '%d', '%d', '%s' )
-		);
+		if ( $this->can_relate_post_ids( $pid1, $pid2 ) ) {
+			// For one way relationships, $pid1 must be the "from" post type.
+			if ( ! $this->is_bidirectional && get_post_type( $pid1 ) !== $this->from ) {
+				$tmp = $pid2;
+				$pid2 = $pid1;
+				$pid1 = $tmp;
+			}
+
+			/**
+			 * $pid2 is first because one way queries execute on the "to" post type,
+			 * which means we join "to" posts on id1 and return "from" posts as id2.
+			 */
+			$table->replace(
+				array( 'id1' => $pid2, 'id2' => $pid1, 'name' => $this->name ),
+				array( '%d', '%d', '%s' )
+			);
+
+			if ( $this->is_bidirectional ) {
+				$table->replace(
+					array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
+					array( '%d', '%d', '%s' )
+				);
+			}
+		}
 
 		/**
 		 * Fires after a relationship has been added
@@ -150,14 +141,26 @@ class PostToPost extends Relationship {
 		/** @var \TenUp\ContentConnect\Tables\PostToPost $table */
 		$table = Plugin::instance()->get_table( 'p2p' );
 
-		$table->delete(
-			array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
-			array( '%d', '%d', '%s' )
-		);
-		$table->delete(
-			array( 'id1' => $pid2, 'id2' => $pid1, 'name' => $this->name ),
-			array( '%d', '%d', '%s' )
-		);
+		if ( $this->can_relate_post_ids( $pid1, $pid2 ) ) {
+			// For one way relationships, $pid1 must be the "from" post type.
+			if ( ! $this->is_bidirectional && get_post_type( $pid1 ) !== $this->from ) {
+				$tmp = $pid2;
+				$pid2 = $pid1;
+				$pid1 = $tmp;
+			}
+
+			$table->delete(
+				array( 'id1' => $pid2, 'id2' => $pid1, 'name' => $this->name ),
+				array( '%d', '%d', '%s' )
+			);
+
+			if ( $this->is_bidirectional ) {
+				$table->delete(
+					array( 'id1' => $pid1, 'id2' => $pid2, 'name' => $this->name ),
+					array( '%d', '%d', '%s' )
+				);
+			}
+		}
 
 		/**
 		 * Fires after a relationship has been deleted
@@ -245,6 +248,29 @@ class PostToPost extends Relationship {
 		/** @var \TenUp\ContentConnect\Tables\PostToPost $table */
 		$table = Plugin::instance()->get_table( 'p2p' );
 		$table->replace_bulk( $fields, $data );
+	}
+
+	/**
+	 * Test the post types of two post IDs to make sure they belong to this
+	 * relationship.
+	 *
+	 * @param int $pid1 A post ID.
+	 * @param int $pid2 A second post ID.
+	 * @return boolean True if both IDs represent post types that belong to the
+	 *                 relationship.
+	 */
+	public function can_relate_post_ids( $pid1, $pid2 ) {
+		$ids = [ $pid1, $pid2 ];
+
+		foreach ( $ids as $id ) {
+			$post_type = get_post_type( $id );
+
+			if ( $post_type !== $this->from && ! in_array( $post_type, $this->to ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 }

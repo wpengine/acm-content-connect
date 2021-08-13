@@ -97,12 +97,12 @@ class PostToPostTest extends ContentConnectTestCase {
 		$keep_pairs = array(
 			array( 1, 2 ),
 			array( 1, 5 ),
-			array( 2, 10 ),
-			array( 2, 15 ),
+			array( 2, 8 ),
+			array( 2, 9 ),
 		);
 
 		$delete_pairs = array(
-			array( 1, 10 ),
+			array( 1, 9 ),
 		);
 
 		$pairs = array_merge( $keep_pairs, $delete_pairs );
@@ -116,7 +116,7 @@ class PostToPostTest extends ContentConnectTestCase {
 			$this->assertEquals( 1, $wpdb->query( "select * from {$wpdb->prefix}post_to_post where id1='{$pair[1]}' and id2='{$pair[0]}' and name='basic'") );
 		}
 
-		$pp->delete_relationship( 1, 10 );
+		$pp->delete_relationship( 1, 9 );
 
 		foreach( $keep_pairs as $pair ) {
 			$this->assertEquals( 1, $wpdb->query( "select * from {$wpdb->prefix}post_to_post where id1='{$pair[0]}' and id2='{$pair[1]}' and name='basic'") );

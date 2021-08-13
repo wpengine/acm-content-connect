@@ -64,20 +64,6 @@ class RelationshipQueryTest extends ContentConnectTestCase {
 		);
 		$this->assertEquals( $expected, $query->segments );
 
-
-		$query = new RelationshipQuery( array(
-			'related_to_user' => '1',
-			'name' => 'owner',
-		) );
-		$expected = array(
-			array(
-				'related_to_user' => '1',
-				'name' => 'owner',
-			)
-		);
-		$this->assertEquals( $expected, $query->segments );
-
-
 		// Test top level keys AND segments in arrays
 		$query = new RelationshipQuery( array(
 			'related_to_post' => '25',
@@ -106,7 +92,6 @@ class RelationshipQueryTest extends ContentConnectTestCase {
 		$this->assertFalse( $query->is_valid_segment( array() ) );
 		$this->assertFalse( $query->is_valid_segment( array( 'name' => 'basic' ) ) );
 		$this->assertFalse( $query->is_valid_segment( array( 'related_to_post' ) ) );
-		$this->assertFalse( $query->is_valid_segment( array( 'related_to_user' ) ) );
 	}
 
 	public function test_valid_segments_are_recognized_as_valid() {
@@ -115,21 +100,6 @@ class RelationshipQueryTest extends ContentConnectTestCase {
 		$this->assertTrue( $query->is_valid_segment( array(
 			'name' => 'basic',
 			'related_to_post' => 45,
-		) ) );
-
-		$this->assertTrue( $query->is_valid_segment( array(
-			'name' => 'owner',
-			'related_to_user' => 1,
-		) ) );
-	}
-
-	public function test_combined_segments_are_invalid() {
-		$query = new RelationshipQuery( array() );
-
-		$this->assertFalse( $query->is_valid_segment( array(
-			'name' => 'basic',
-			'related_to_post' => 45,
-			'related_to_user' => 2,
 		) ) );
 	}
 
@@ -150,14 +120,6 @@ class RelationshipQueryTest extends ContentConnectTestCase {
 			)
 		) );
 		$this->assertTrue( $query->has_valid_segments() );
-
-		$query = new RelationshipQuery( array(
-			array(
-				'related_to_user' => 2,
-				'name' => 'owner',
-			)
-		) );
-		$this->assertTrue( $query->has_valid_segments() );
 	}
 
 	public function test_generate_where_clause() {
@@ -169,20 +131,9 @@ class RelationshipQueryTest extends ContentConnectTestCase {
 		$expected = '';
 		$this->assertEquals( $expected, $query->where );
 
-		// Should also return nothing, since also not defined
-		$query = new RelationshipQuery(array(
-			'name' => 'owner',
-			'related_to_user' => 2,
-		));
-		$expected = '';
-		$this->assertEquals( $expected, $query->where );
-
-
 		$registry = Plugin::instance()->get_registry();
 		$registry->define_post_to_post( 'post', 'post', 'basic' );
 		$registry->define_post_to_post( 'post', 'post', 'complex' );
-		$registry->define_post_to_user( 'post', 'owner' );
-
 
 		// If we end up with all invalid segments, we should have no changes to where
 		$query = new RelationshipQuery( array() );
@@ -226,85 +177,6 @@ class RelationshipQueryTest extends ContentConnectTestCase {
 		) );
 		$expected = " and ((p2p1.id2 = 2 and p2p1.name = 'basic') AND (p2p2.id2 = 4 and p2p2.name = 'complex'))";
 		$this->assertEquals( $expected, $query->where );
-
-
-		/* Combined User / Post Queries */
-
-
-		$query = new RelationshipQuery( array(
-			array(
-				'name' => 'basic',
-				'related_to_post' => 2,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 4,
-			),
-			'relation' => 'AND',
-		) );
-		$expected = " and ((p2p1.id2 = 2 and p2p1.name = 'basic') AND (p2u2.user_id = 4 and p2u2.name = 'owner'))";
-		$this->assertEquals( $expected, $query->where );
-
-
-		$query = new RelationshipQuery( array(
-			array(
-				'name' => 'basic',
-				'related_to_post' => 2,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 4,
-			),
-			'relation' => 'OR',
-		) );
-		$expected = " and ((p2p1.id2 = 2 and p2p1.name = 'basic') OR (p2u1.user_id = 4 and p2u1.name = 'owner'))";
-		$this->assertEquals( $expected, $query->where );
-
-
-		$query = new RelationshipQuery( array(
-			array(
-				'name' => 'basic',
-				'related_to_post' => 2,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 4,
-			),
-			array(
-				'name' => 'basic',
-				'related_to_post' => 1,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 3,
-			),
-			'relation' => 'OR',
-		) );
-		$expected = " and ((p2p1.id2 = 2 and p2p1.name = 'basic') OR (p2u1.user_id = 4 and p2u1.name = 'owner') OR (p2p1.id2 = 1 and p2p1.name = 'basic') OR (p2u1.user_id = 3 and p2u1.name = 'owner'))";
-		$this->assertEquals( $expected, $query->where );
-
-
-		$query = new RelationshipQuery( array(
-			array(
-				'name' => 'basic',
-				'related_to_post' => 2,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 4,
-			),
-			array(
-				'name' => 'basic',
-				'related_to_post' => 1,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 3,
-			),
-			'relation' => 'AND',
-		) );
-		$expected = " and ((p2p1.id2 = 2 and p2p1.name = 'basic') AND (p2u2.user_id = 4 and p2u2.name = 'owner') AND (p2p3.id2 = 1 and p2p3.name = 'basic') AND (p2u4.user_id = 3 and p2u4.name = 'owner'))";
-		$this->assertEquals( $expected, $query->where );
 	}
 
 	public function test_generate_join_clause() {
@@ -318,19 +190,10 @@ class RelationshipQueryTest extends ContentConnectTestCase {
 		$expected = '';
 		$this->assertEquals( $expected, $query->join );
 
-		// Should also return nothing, since also not defined
-		$query = new RelationshipQuery(array(
-			'name' => 'owner',
-			'related_to_user' => 2,
-		));
-		$expected = '';
-		$this->assertEquals( $expected, $query->join );
-
 
 		$registry = Plugin::instance()->get_registry();
 		$registry->define_post_to_post( 'post', 'post', 'basic' );
 		$registry->define_post_to_post( 'post', 'post', 'complex' );
-		$registry->define_post_to_user('post', 'owner' );
 
 
 		$query = new RelationshipQuery( array(
@@ -368,115 +231,6 @@ class RelationshipQueryTest extends ContentConnectTestCase {
 			'relation' => 'AND',
 		) );
 		$expected = " left join {$wpdb->prefix}post_to_post as p2p1 on {$wpdb->posts}.ID = p2p1.id1 left join {$wpdb->prefix}post_to_post as p2p2 on {$wpdb->posts}.ID = p2p2.id1";
-		$this->assertEquals( $expected, $query->join );
-
-
-		$query = new RelationshipQuery( array(
-			array(
-				'name' => 'owner',
-				'related_to_user' => 4,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 3,
-			),
-			'relation' => 'AND',
-		) );
-		$expected = " left join {$wpdb->prefix}post_to_user as p2u1 on {$wpdb->posts}.ID = p2u1.post_id left join {$wpdb->prefix}post_to_user as p2u2 on {$wpdb->posts}.ID = p2u2.post_id";
-		$this->assertEquals( $expected, $query->join );
-
-
-		$query = new RelationshipQuery( array(
-			array(
-				'name' => 'owner',
-				'related_to_user' => 4,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 3,
-			),
-			'relation' => 'OR',
-		) );
-		$expected = " left join {$wpdb->prefix}post_to_user as p2u1 on {$wpdb->posts}.ID = p2u1.post_id";
-		$this->assertEquals( $expected, $query->join );
-
-
-		/* Combined User / Post Queries */
-
-
-		$query = new RelationshipQuery( array(
-			array(
-				'name' => 'basic',
-				'related_to_post' => 2,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 4,
-			),
-			'relation' => 'AND',
-		) );
-		$expected = " left join {$wpdb->prefix}post_to_post as p2p1 on {$wpdb->posts}.ID = p2p1.id1 left join {$wpdb->prefix}post_to_user as p2u2 on {$wpdb->posts}.ID = p2u2.post_id";
-		$this->assertEquals( $expected, $query->join );
-
-
-		$query = new RelationshipQuery( array(
-			array(
-				'name' => 'basic',
-				'related_to_post' => 2,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 4,
-			),
-			'relation' => 'OR',
-		) );
-		$expected = " left join {$wpdb->prefix}post_to_post as p2p1 on {$wpdb->posts}.ID = p2p1.id1 left join {$wpdb->prefix}post_to_user as p2u1 on {$wpdb->posts}.ID = p2u1.post_id";
-		$this->assertEquals( $expected, $query->join );
-
-
-		$query = new RelationshipQuery( array(
-			array(
-				'name' => 'basic',
-				'related_to_post' => 2,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 4,
-			),
-			array(
-				'name' => 'basic',
-				'related_to_post' => 1,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 3,
-			),
-			'relation' => 'OR',
-		) );
-		$expected = " left join {$wpdb->prefix}post_to_post as p2p1 on {$wpdb->posts}.ID = p2p1.id1 left join {$wpdb->prefix}post_to_user as p2u1 on {$wpdb->posts}.ID = p2u1.post_id";
-		$this->assertEquals( $expected, $query->join );
-
-
-		$query = new RelationshipQuery( array(
-			array(
-				'name' => 'basic',
-				'related_to_post' => 2,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 4,
-			),
-			array(
-				'name' => 'basic',
-				'related_to_post' => 1,
-			),
-			array(
-				'name' => 'owner',
-				'related_to_user' => 3,
-			),
-			'relation' => 'AND',
-		) );
-		$expected = " left join {$wpdb->prefix}post_to_post as p2p1 on {$wpdb->posts}.ID = p2p1.id1 left join {$wpdb->prefix}post_to_user as p2u2 on {$wpdb->posts}.ID = p2u2.post_id left join {$wpdb->prefix}post_to_post as p2p3 on {$wpdb->posts}.ID = p2p3.id1 left join {$wpdb->prefix}post_to_user as p2u4 on {$wpdb->posts}.ID = p2u4.post_id";
 		$this->assertEquals( $expected, $query->join );
 	}
 
