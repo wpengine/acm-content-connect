@@ -1,11 +1,11 @@
 <?php
 
-namespace TenUp\ContentConnect;
+namespace WPE\AtlasContentModeler\ContentConnect;
 
-use TenUp\ContentConnect\API\Search;
-use TenUp\ContentConnect\QueryIntegration\WPQueryIntegration;
-use TenUp\ContentConnect\Relationships\DeletedItems;
-use TenUp\ContentConnect\Tables\PostToPost;
+use WPE\AtlasContentModeler\ContentConnect\API\Search;
+use WPE\AtlasContentModeler\ContentConnect\QueryIntegration\WPQueryIntegration;
+use WPE\AtlasContentModeler\ContentConnect\Relationships\DeletedItems;
+use WPE\AtlasContentModeler\ContentConnect\Tables\PostToPost;
 
 class Plugin {
 
@@ -95,7 +95,7 @@ class Plugin {
 	}
 
 	public function wp_init() {
-		do_action( 'tenup-content-connect-init', $this->registry );
+		do_action( 'acm_content_connect_init', $this->registry );
 	}
 
 	public function register_tables() {

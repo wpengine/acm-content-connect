@@ -1,32 +1,42 @@
-# WP Content Connect
+# ACM Content Connect
 
-> WordPress library that enables direct relationships for posts to posts.
+> Library for Atlas Content Modeler that enables direct relationships for posts to posts.
 
-[![Support Level](https://img.shields.io/badge/support-stable-blue.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/wp-content-connect.svg)](https://github.com/10up/wp-content-connect/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v5.3%20tested-success.svg) [![GPLv3 License](https://img.shields.io/github/license/10up/wp-content-connect.svg)](https://github.com/10up/wp-content-connect/blob/master/LICENSE.md)
+Based on the [10up/wp-content-connect](https://github.com/10up/wp-content-connect) library and heavily modified for use in the [Atlas Content Modeler](https://github.com/wpengine/atlas-content-modeler) WordPress plugin.
 
 ## Installation and Usage
 
 ### Composer install
 
-First, require this repository directly in `composer.json`:
+First, you'll need to add this repository to your composer config.
+
+```sh
+composer config repositories.acm-content-connect vcs https://github.com/wpengine/acm-content-connect.git
+```
+
+Or, directly in `composer.json`:
 
 ```
   "repositories": [
       {
           "type": "vcs",
-          "url": "https://github.com/apmatthews/wp-content-connect.git"
+          "url": "https://github.com/wpengine/acm-content-connect.git"
       }
-  ],
-  "require": {
-    "10up/wp-content-connect": "^1.5.0"
-  }
+  ]
 ```
 
-This will install WP Content Connect to your `vendor` folder and allow you to to use it as a library by calling `\TenUp\ContentConnect\Plugin::instance();` from your code.
+Now require the package.
+
+```sh
+composer require wpengine/acm-content-connect:dev-main
+```
+
+This will install WP Content Connect to your `vendor` folder and allow you to to use it as a library by calling `\WPE\AtlasContentModeler\ContentConnect\Plugin::instance();` from your code.
 
 
 ## Defining Relationships
-Relationships can be defined once any post types they utilize are defined by hooking into the `tenup-content-connect-init` action. This action is fired on the WordPress `init` action, at priority 100, so any post types must be registered prior to this. Additionally, when registering a relationship, you must specify a `name`. Name enables multiple distinct relationships between the same object types. For instance, you could have a relationship for post type `post` with a type of `researchers` to indicate that any entry in the "researcher" relationship is a researcher for the post and have another relationship defined for post type `post` with a name of `backer` to indicate that any entry in the "backer" relationship contributes financially to the post.
+Register relationships on the `acm_content_connect_init` action. Relationships can only be defined after any post types they utilize are defined. The `acm_content_connect_init` action is fired on the WordPress `init` action at priority 100, so any related post types must be registered prior to this. Additionally, when registering a relationship, you must specify a `name`. Name enables multiple distinct relationships between the same object types. For instance, you could have a relationship for the `project` post type with a `name` of `researchers` to indicate that any entry in the "researchers" relationship is a researcher for the project. You could then define another relationship for the `project` post type with a name of `backers` to indicate that any entry in the "backers" relationship contributes financially to the post. In this example, `researchers` and `backers` have
+the same post type, so the `name` is the only ditingusing feature of each relationship.
 
 ### `define_post_to_post( $from, $to, $name, $args = array() )`
 This method defines a post to post relationship between two post types, `$from` and `$to`.
@@ -49,13 +59,13 @@ Optional.
 
 You may also supply arguments for each side of the relationship through the `from` and `to` top level keys. Options for each direction are as follows:
 
-- `enable_ui` (Bool) - Should the default UI be enabled for the current side of this relationship
+- `enable_ui` (Bool) - Should the UI be enabled for the current side of this relationship
 - `sortable` (Bool) - Should the relationship be sortable for the current side of this relationship
 - `labels` (Array) - Labels used in the UI for the relationship. Currently only expects one value, `name` (String)
 
 #### Return Value
 
-This method returns an instance of `\TenUp\ContentConnect\Relationships\PostToPost` specific to this relationship. The object can then be used to manage related items manually, if required. See the <@TODO insert link> section below.
+This method returns an instance of `\WPE\AtlasContentModeler\ContentConnect\Relationships\PostToPost` specific to this relationship. The object can then be used to manage related items manually, if required. See the [Managing Relationships](https://github.com/wpengine/acm-content-connect#managing-relationships) section below.
 
 Example:
 
@@ -81,7 +91,7 @@ function my_define_relationships( $registry ) {
 
     $relationship = $registry->define_post_to_post( 'car', 'tire', 'car-tires', $args );    
 }
-add_action( 'tenup-content-connect-init', 'my_define_relationships' );
+add_action( 'wpengine_content_connect_init', 'my_define_relationships' );
 
 ```
 
@@ -94,7 +104,7 @@ Since you can manage this relationship from both post types in the relationship,
 
 ## Query Integration
 
-Querying for relationships is enabled via a new `relationship_query` parameter for `WP_Query`. The format for `relationship_query` is very similar to `tax_query`.
+Querying for relationships is enabled via a new `acm_relationship_query` parameter for `WP_Query`. The format for `acm_relationship_query` is very similar to `tax_query`.
 
 A valid relationship query segment **requires** `name` and `related_to_post`. As many relationship segments as necessary can be combined to create a specific set of results, and can be combined using an `AND` or `OR` relation.
 
@@ -112,7 +122,7 @@ Example:
 ```php
 $query = new WP_Query( array(
     'post_type' => 'post',
-    'relationship_query' => array(
+    'acm_relationship_query' => array(
         'relation' => 'AND', // AND is default
         array(
             'related_to_post' => 25,
@@ -135,7 +145,7 @@ When using `relationship` as the orderby value, the order is always `ASC` and yo
 For example, this is fine:
 
 ```php
-'relationship_query' => array(
+'acm_relationship_query' => array(
     array(
         'related_to_post' => 25,
         'name' => 'related',
@@ -146,7 +156,7 @@ For example, this is fine:
 
 while this will not work (orderby will be ignored):
 ```php
-'relationship_query' => array(
+'acm_relationship_query' => array(
     array(
         'related_to_post' => 25,
         'name' => 'related',
@@ -169,8 +179,7 @@ If you don't already have a relationship object, you can get one from the regist
 `Registry->get_post_to_post_relationship()`.
 
 ### `Registry->get_post_to_post_relationship( $cpt1, $cpt2, $name )`
-Returns the relationship object between the two post types with the provided name. For one way relationships, post type
-argument order must match the order was used to define the relationship.
+Returns the relationship object between the two post types with the provided name. For one way relationships, post type argument order must match the order was used to define the relationship.
 
 #### Parameters:
 
@@ -183,7 +192,7 @@ argument order must match the order was used to define the relationship.
 #### Example:
 
 ```php
-$registry = \TenUp\ContentConnect\Plugin::instance()->get_registry();
+$registry = \WPE\AtlasContentModeler\ContentConnect\Plugin::instance()->get_registry();
 
 // Gets the car to tire relationship defined in the example above
 $relationship = $registry->get_post_to_post_relationship( 'car', 'tire', 'car-tires' );
@@ -256,13 +265,3 @@ Car ID 5 has five related tires, that should be ordered 7, 6, 3, 8, 2
 // $relationship is the return value from ->define_post_to_post()
 $relationship->save_sort_data( 5, array( 7, 6, 3, 8, 2 ) );
 ```
-
-## Support Level
-
-**Stable:** 10up is not planning to develop any new features for this, but will still respond to bug reports and security concerns. We welcome PRs, but any that include new features should be small and easy to integrate and should not include breaking changes. We otherwise intend to keep this tested up to the most recent version of WordPress.
-
-## Like what you see?
-
-<p align="center">
-<a href="http://10up.com/contact/"><img src="https://10up.com/uploads/2016/10/10up-Github-Banner.png" width="850"></a>
-</p>

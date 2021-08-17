@@ -1,9 +1,9 @@
 <?php
 
-namespace TenUp\ContentConnect\Tests\Integration;
+namespace WPE\AtlasContentModeler\ContentConnect\Tests\Integration;
 
-use TenUp\ContentConnect\Relationships\PostToPost;
-use TenUp\ContentConnect\Relationships\PostToUser;
+use WPE\AtlasContentModeler\ContentConnect\Relationships\PostToPost;
+use WPE\AtlasContentModeler\ContentConnect\Relationships\PostToUser;
 
 class ContentConnectTestCase extends \PHPUnit_Framework_TestCase {
 
@@ -46,7 +46,7 @@ class ContentConnectTestCase extends \PHPUnit_Framework_TestCase {
 	public function add_post_relations() {
 		global $wpdb;
 
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}post_to_post;" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}acm_post_to_post;" );
 
 		// post to post "basic" name
 		$ppb = new PostToPost( 'post', 'post', 'basic' );

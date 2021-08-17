@@ -1,8 +1,8 @@
 <?php
 
-namespace TenUp\ContentConnect\Relationships;
+namespace WPE\AtlasContentModeler\ContentConnect\Relationships;
 
-use TenUp\ContentConnect\Plugin;
+use WPE\AtlasContentModeler\ContentConnect\Plugin;
 
 class PostToPost extends Relationship {
 
@@ -53,7 +53,7 @@ class PostToPost extends Relationship {
 	 * @return array
 	 */
 	public function get_related_object_ids( $post_id, $order_by_relationship = false ) {
-		/** @var \TenUp\ContentConnect\Tables\PostToPost $table */
+		/** @var \WPE\AtlasContentModeler\ContentConnect\Tables\PostToPost $table */
 		$table = Plugin::instance()->get_table( 'p2p' );
 		$db = $table->get_db();
 
@@ -87,7 +87,8 @@ class PostToPost extends Relationship {
 	/**
 	 * Since we are joining on the same tables, its rather difficult to always know which order the relationship will be
 	 * ESPECIALLY when joining the same post type to itself. To work around this, we just store both combinations of
-	 * the relationship. Adds a tiny bit of data to the DB, but greatly simplifies queries to find related posts
+	 * the relationship if the relationship is bidirectional. Adds a tiny bit of data to the DB, but greatly simplifies
+	 * queries to find related posts.
 	 *
 	 * Coincidentally, this also allows us to store directional sort order information
 	 *
@@ -97,7 +98,7 @@ class PostToPost extends Relationship {
 	 * @param $pid2
 	 */
 	public function add_relationship( $pid1, $pid2 ) {
-		/** @var \TenUp\ContentConnect\Tables\PostToPost $table */
+		/** @var \WPE\AtlasContentModeler\ContentConnect\Tables\PostToPost $table */
 		$table = Plugin::instance()->get_table( 'p2p' );
 
 		if ( $this->can_relate_post_ids( $pid1, $pid2 ) ) {
@@ -124,21 +125,10 @@ class PostToPost extends Relationship {
 				);
 			}
 		}
-
-		/**
-		 * Fires after a relationship has been added
-		 * @since 1.3.0
-		 *
-		 * @param int $pid1 ID of the first item
-		 * @param int $pid2 ID of the second item
-		 * @param string $name relationship name
-		 * @param string $type relationship type (post-to-post|post-to-user)
-		 */
-		do_action( 'tenup-content-connect-add-relationship', $pid1, $pid2, $this->name, 'post-to-post' );
 	}
 
 	public function delete_relationship( $pid1, $pid2 ) {
-		/** @var \TenUp\ContentConnect\Tables\PostToPost $table */
+		/** @var \WPE\AtlasContentModeler\ContentConnect\Tables\PostToPost $table */
 		$table = Plugin::instance()->get_table( 'p2p' );
 
 		if ( $this->can_relate_post_ids( $pid1, $pid2 ) ) {
@@ -161,17 +151,6 @@ class PostToPost extends Relationship {
 				);
 			}
 		}
-
-		/**
-		 * Fires after a relationship has been deleted
-		 * @since 1.3.0
-		 *
-		 * @param int $pid1 ID of the first item
-		 * @param int $pid2 ID of the second item
-		 * @param string $name relationship name
-		 * @param string $type relationship type (post-to-post|post-to-user)
-		 */
-		do_action( 'tenup-content-connect-delete-relationship', $pid1, $pid2, $this->name, 'post-to-post' );
 	}
 
 	/**
@@ -195,16 +174,6 @@ class PostToPost extends Relationship {
 		foreach( $add_ids as $add ) {
 			$this->add_relationship( $post_id, $add );
 		}
-
-		/**
-		 * Fires after a relationship has been replaced
-		 * @since 1.3.0
-		 *
-		 * @param int $pid1 ID of the first item
-		 * @param int $pid2 ID of the second item
-		 * @param string $type relationship type (post-to-post|post-to-user|user-to-post)
-		 */
-		do_action( 'tenup-content-connect-replace-relationships', $post_id, $related_ids, 'post-to-post' );
 	}
 
 	/**
@@ -245,7 +214,7 @@ class PostToPost extends Relationship {
 			'order' => '%d',
 		);
 
-		/** @var \TenUp\ContentConnect\Tables\PostToPost $table */
+		/** @var \WPE\AtlasContentModeler\ContentConnect\Tables\PostToPost $table */
 		$table = Plugin::instance()->get_table( 'p2p' );
 		$table->replace_bulk( $fields, $data );
 	}

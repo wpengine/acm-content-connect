@@ -1,9 +1,9 @@
 <?php
 
-namespace TenUp\ContentConnect\Tests\Integration;
+namespace WPE\AtlasContentModeler\ContentConnect\Tests\Integration;
 
-use TenUp\ContentConnect\Registry;
-use TenUp\ContentConnect\Relationships\PostToPost;
+use WPE\AtlasContentModeler\ContentConnect\Registry;
+use WPE\AtlasContentModeler\ContentConnect\Relationships\PostToPost;
 
 class RegistryTest extends ContentConnectTestCase {
 

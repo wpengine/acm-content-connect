@@ -1,16 +1,19 @@
 <?php
 
-namespace TenUp\ContentConnect\API;
-
+namespace WPE\AtlasContentModeler\ContentConnect\API;
+/**
+ * Currently unused, but may be useful when we integrate search
+ * into the realtionships UI.
+ */
 class Search {
 
 	public function setup() {
 		add_action( 'rest_api_init', array( $this, 'register_endpoint' ) );
-		add_filter( 'tenup_content_connect_localize_data', array( $this, 'localize_endpoints' ) );
+		add_filter( 'acm_content_connect_localize_data', array( $this, 'localize_endpoints' ) );
 	}
 
 	public function register_endpoint() {
-		register_rest_route( 'content-connect/v1', '/search', array(
+		register_rest_route( 'atlas', 'content-connect/search', array(
 			'methods' => 'POST',
 			'callback' => array( $this, 'process_search' ),
 			'permission_callback' => array( $this, 'check_permission' ),
@@ -18,8 +21,8 @@ class Search {
 	}
 
 	public function localize_endpoints( $data ) {
-		$data['endpoints']['search'] = get_rest_url( get_current_blog_id(), 'content-connect/v1/search' );
-		$data['nonces']['search']    = wp_create_nonce( 'content-connect-search' );
+		$data['endpoints']['search'] = get_rest_url( get_current_blog_id(), 'atlas/content-connect/search' );
+		$data['nonces']['search']    = wp_create_nonce( 'acm-content-connect-search' );
 
 		return $data;
 	}
@@ -39,7 +42,7 @@ class Search {
 		$nonce = $request->get_param( 'nonce' );
 
 		// If the user got the nonce, they were on the proper edit page
-		if ( ! wp_verify_nonce( $nonce, 'content-connect-search' ) ) {
+		if ( ! wp_verify_nonce( $nonce, 'acm-content-connect-search' ) ) {
 			return false;
 		}
 
@@ -51,28 +54,20 @@ class Search {
 	 *
 	 * @param $request \WP_REST_Request
 	 *
-	 * @return array Array of posts or users that match the query
+	 * @return array Array of posts that match the query
 	 */
 	public function process_search( $request ) {
-		$object_type = $request->get_param( 'object_type' );
+		$final_post_types = array();
+		$post_types = $request->get_param( 'post_type' );
 
-		if ( ! in_array( $object_type, array( 'post' ) ) ) {
-			return array();
+		foreach( (array) $post_types as $post_type ) {
+			if ( post_type_exists( $post_type ) ) {
+				$final_post_types[] = $post_type;
+			}
 		}
 
-		$final_post_types = array();
-		if ( $object_type === 'post' ) {
-			$post_types = $request->get_param( 'post_type' );
-
-			foreach( (array) $post_types as $post_type ) {
-				if ( post_type_exists( $post_type ) ) {
-					$final_post_types[] = $post_type;
-				}
-			}
-
-			if ( empty( $final_post_types ) ) {
-				return array();
-			}
+		if ( empty( $final_post_types ) ) {
+			return array();
 		}
 
 		$search_text = sanitize_text_field( $request->get_param( 'search' ) );
@@ -102,15 +97,6 @@ class Search {
 			'paged'     => $args['paged'],
 		);
 
-		/**
-		 * Filters the search posts query args.
-		 *
-		 * @since  1.5.0
-		 * @param  array $query_args The \WP_Query args.
-		 * @param  array $args       Optional. The search posts args. Default empty.
-		 * @return array
-		 */
-		$query_args = apply_filters( 'tenup_content_connect_search_posts_query_args', $query_args, $args );
 		$query      = new \WP_Query( $query_args );
 
 		$results = array(

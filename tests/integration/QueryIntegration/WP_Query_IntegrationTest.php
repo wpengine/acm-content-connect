@@ -1,20 +1,20 @@
 <?php
 
-namespace TenUp\ContentConnect\Tests\Integration\QueryIntegration;
+namespace WPE\AtlasContentModeler\ContentConnect\Tests\Integration\QueryIntegration;
 
-use TenUp\ContentConnect\Plugin;
-use TenUp\ContentConnect\QueryIntegration\RelationshipQuery;
-use TenUp\ContentConnect\QueryIntegration\WPQueryIntegration;
-use TenUp\ContentConnect\Registry;
-use TenUp\ContentConnect\Relationships\PostToPost;
-use TenUp\ContentConnect\Tests\Integration\ContentConnectTestCase;
+use WPE\AtlasContentModeler\ContentConnect\Plugin;
+use WPE\AtlasContentModeler\ContentConnect\QueryIntegration\RelationshipQuery;
+use WPE\AtlasContentModeler\ContentConnect\QueryIntegration\WPQueryIntegration;
+use WPE\AtlasContentModeler\ContentConnect\Registry;
+use WPE\AtlasContentModeler\ContentConnect\Relationships\PostToPost;
+use WPE\AtlasContentModeler\ContentConnect\Tests\Integration\ContentConnectTestCase;
 
 class WP_Query_IntegrationTest extends ContentConnectTestCase {
 
 	public function setUp() {
 		global $wpdb;
 
-		$wpdb->query( "delete from {$wpdb->prefix}post_to_post" );
+		$wpdb->query( "delete from {$wpdb->prefix}acm_post_to_post" );
 
 		$plugin = Plugin::instance();
 		$plugin->registry = new Registry();
@@ -43,7 +43,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 			'order' => 'ASC',
 			'posts_per_page' => 2,
 			'paged' => 1,
-			'relationship_query' => array(
+			'acm_relationship_query' => array(
 				array(
 					'related_to_post' => '20',
 					'name' => 'page1',
@@ -89,7 +89,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 			'order' => 'ASC',
 			'posts_per_page' => 2,
 			'paged' => 1,
-			'relationship_query' => array(
+			'acm_relationship_query' => array(
 				array(
 					'name' => 'page1',
 				),
@@ -114,7 +114,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 			'order' => 'ASC',
 			'posts_per_page' => 2,
 			'paged' => 1,
-			'relationship_query' => array(
+			'acm_relationship_query' => array(
 				array(
 					'related_to_post' => '31',
 				),
@@ -140,7 +140,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 			'order' => 'ASC',
 			'posts_per_page' => 2,
 			'paged' => 1,
-			'relationship_query' => array(
+			'acm_relationship_query' => array(
 				array(
 					'related_to_post' => '31',
 					'name' => 'page1',
@@ -156,7 +156,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 		$query = new \WP_Query( $args );
 		$this->assertEquals( array( 44, 48 ), $query->posts );
 
-		$args['relationship_query'][0]['related_to_post'] = 32;
+		$args['acm_relationship_query'][0]['related_to_post'] = 32;
 		$args['paged'] = 1;
 		$query = new \WP_Query( $args );
 		$this->assertEquals( array( 37, 41 ), $query->posts );
@@ -166,12 +166,12 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 		$this->assertEquals( array( 45, 49 ), $query->posts );
 
 		// Different name, so should come back empty
-		$args['relationship_query'][0]['related_to_post'] = 33;
+		$args['acm_relationship_query'][0]['related_to_post'] = 33;
 		$args['paged'] = 1;
 		$query = new \WP_Query( $args );
 		$this->assertEquals( array(), $query->posts );
 
-		$args['relationship_query'][0]['name'] = 'page2';
+		$args['acm_relationship_query'][0]['name'] = 'page2';
 		$query = new \WP_Query( $args );
 		$this->assertEquals( array( 38, 42 ), $query->posts );
 
@@ -194,7 +194,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 		);
 
 
-		$args['relationship_query'] = array(
+		$args['acm_relationship_query'] = array(
 			'relation' => 'OR',
 			array(
 				'related_to_post' => 1,
@@ -209,7 +209,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 		$this->assertEquals( array( 2, 3, 4 ), $query->posts );
 
 
-		$args['relationship_query']['relation'] = 'AND';
+		$args['acm_relationship_query']['relation'] = 'AND';
 		$query = new \WP_Query( $args );
 		$this->assertEquals( array( 3 ), $query->posts );
 	}
@@ -223,7 +223,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 			'orderby' => 'relationship',
 		);
 
-		$query->relationship_query = new RelationshipQuery( array(
+		$query->acm_relationship_query = new RelationshipQuery( array(
 			array(
 				'related_to_post' => 1,
 				'name' => 'basic',
@@ -231,7 +231,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 		) );
 
 		// The other function does nothing without a where
-		$query->relationship_query->where = 'WHERE';
+		$query->acm_relationship_query->where = 'WHERE';
 
 		$orderby = 'default';
 
@@ -240,7 +240,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 		$this->assertEquals( 'p2p1.order = 0, p2p1.order ASC', $integration->posts_orderby( $orderby, $query ) );
 
 
-		$query->relationship_query = new RelationshipQuery( array(
+		$query->acm_relationship_query = new RelationshipQuery( array(
 			array(
 				'related_to_post' => 1,
 				'name' => 'basic',
@@ -252,7 +252,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 		) );
 
 		// The other function does nothing without a where
-		$query->relationship_query->where = 'WHERE';
+		$query->acm_relationship_query->where = 'WHERE';
 
 		$this->assertEquals( 'default', $integration->posts_orderby( $orderby, $query ) );
 	}
@@ -270,7 +270,7 @@ class WP_Query_IntegrationTest extends ContentConnectTestCase {
 			'orderby' => 'relationship',
 			'posts_per_page' => 2,
 			'paged' => 1,
-			'relationship_query' => array(
+			'acm_relationship_query' => array(
 				array(
 					'related_to_post' => '31',
 					'name' => 'page1',
