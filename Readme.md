@@ -162,9 +162,9 @@ while this will not work (orderby will be ignored):
         'name' => 'related',
     ),
     array(
-		'related_to_post' => 15,
-		'name' => 'related',
-	),
+        'related_to_post' => 15,
+        'name' => 'related',
+    ),
 ),
 'orderby' => 'relationship',
 ```
