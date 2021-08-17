@@ -10,10 +10,10 @@ require_once $_tests_dir . '/includes/functions.php';
 
 function _manually_load_plugin() {
 	require_once dirname(__FILE__) . '/../../autoload.php';
-	wp_content_connect_autoloader();
+	acm_content_connect_autoloader();
 
 	// Kick things off
-	\TenUp\ContentConnect\Plugin::instance();
+	\WPE\AtlasContentModeler\ContentConnect\Plugin::instance();
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace TenUp\ContentConnect\Tests\Integration\Helpers;
+namespace WPE\AtlasContentModeler\ContentConnect\Tests\Integration\Helpers;
 
-use function TenUp\ContentConnect\Helpers\get_registry;
-use function TenUp\ContentConnect\Helpers\get_related_ids_by_name;
-use TenUp\ContentConnect\Tests\Integration\ContentConnectTestCase;
+use function WPE\AtlasContentModeler\ContentConnect\Helpers\get_registry;
+use function WPE\AtlasContentModeler\ContentConnect\Helpers\get_related_ids_by_name;
+use WPE\AtlasContentModeler\ContentConnect\Tests\Integration\ContentConnectTestCase;
 
 class GetRelatedIdsByNameTest extends ContentConnectTestCase {
 

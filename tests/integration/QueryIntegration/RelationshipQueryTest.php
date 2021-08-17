@@ -1,11 +1,11 @@
 <?php
 
-namespace TenUp\ContentConnect\Tests\Integration\QueryIntegration;
+namespace WPE\AtlasContentModeler\ContentConnect\Tests\Integration\QueryIntegration;
 
-use TenUp\ContentConnect\Plugin;
-use TenUp\ContentConnect\QueryIntegration\RelationshipQuery;
-use TenUp\ContentConnect\Registry;
-use TenUp\ContentConnect\Tests\Integration\ContentConnectTestCase;
+use WPE\AtlasContentModeler\ContentConnect\Plugin;
+use WPE\AtlasContentModeler\ContentConnect\QueryIntegration\RelationshipQuery;
+use WPE\AtlasContentModeler\ContentConnect\Registry;
+use WPE\AtlasContentModeler\ContentConnect\Tests\Integration\ContentConnectTestCase;
 
 class RelationshipQueryTest extends ContentConnectTestCase {
 
@@ -200,7 +200,7 @@ class RelationshipQueryTest extends ContentConnectTestCase {
 			'name' => 'basic',
 			'related_to_post' => 1
 		) );
-		$expected = " left join {$wpdb->prefix}post_to_post as p2p1 on {$wpdb->posts}.ID = p2p1.id1";
+		$expected = " left join {$wpdb->prefix}acm_post_to_post as p2p1 on {$wpdb->posts}.ID = p2p1.id1";
 		$this->assertEquals( $expected, $query->join );
 
 
@@ -215,7 +215,7 @@ class RelationshipQueryTest extends ContentConnectTestCase {
 			),
 			'relation' => 'OR',
 		) );
-		$expected = " left join {$wpdb->prefix}post_to_post as p2p1 on {$wpdb->posts}.ID = p2p1.id1";
+		$expected = " left join {$wpdb->prefix}acm_post_to_post as p2p1 on {$wpdb->posts}.ID = p2p1.id1";
 		$this->assertEquals( $expected, $query->join );
 
 
@@ -230,7 +230,7 @@ class RelationshipQueryTest extends ContentConnectTestCase {
 			),
 			'relation' => 'AND',
 		) );
-		$expected = " left join {$wpdb->prefix}post_to_post as p2p1 on {$wpdb->posts}.ID = p2p1.id1 left join {$wpdb->prefix}post_to_post as p2p2 on {$wpdb->posts}.ID = p2p2.id1";
+		$expected = " left join {$wpdb->prefix}acm_post_to_post as p2p1 on {$wpdb->posts}.ID = p2p1.id1 left join {$wpdb->prefix}acm_post_to_post as p2p2 on {$wpdb->posts}.ID = p2p2.id1";
 		$this->assertEquals( $expected, $query->join );
 	}
 

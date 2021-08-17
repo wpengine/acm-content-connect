@@ -1,6 +1,6 @@
 {
-    "name": "10up/wp-content-connect",
-    "description": "Post to Post and Post to User Library for WordPress",
+    "name": "wpengine/acm-content-connect",
+    "description": "Post to Post Library for Atlas Content Modeler",
     "type": "library",
     "license": "GPL-3.0-or-later",
     "authors": [
@@ -12,9 +12,8 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "TenUp\\ContentConnect\\": "includes",
-            "TenUp\\ContentConnect\\Tests\\Integration\\": "tests/integration",
-            "TenUp\\ContentConnect\\Tests\\Unit\\": "tests/unit"
+            "WPE\\AtlasContentModeler\\ContentConnect\\": "includes",
+            "WPE\\AtlasContentModeler\\ContentConnect\\Tests\\Integration\\": "tests/integration"
         },
         "files": [
             "includes/Helpers.php"

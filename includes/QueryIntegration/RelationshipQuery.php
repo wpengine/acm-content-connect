@@ -1,9 +1,9 @@
 <?php
 
-namespace TenUp\ContentConnect\QueryIntegration;
+namespace WPE\AtlasContentModeler\ContentConnect\QueryIntegration;
 
-use TenUp\ContentConnect\Plugin;
-use TenUp\ContentConnect\Relationships\PostToPost;
+use WPE\AtlasContentModeler\ContentConnect\Plugin;
+use WPE\AtlasContentModeler\ContentConnect\Relationships\PostToPost;
 
 class RelationshipQuery{
 
@@ -185,7 +185,7 @@ class RelationshipQuery{
 			if ( $relationship = $this->get_relationship_for_segment( $segment ) ) {
 				if ( $relationship instanceof PostToPost ) {
 					if ( $this->relation === 'AND' || $this->p2p_join === false ) {
-						$join_parts[] = " left join {$wpdb->prefix}post_to_post as p2p{$joincount} on {$wpdb->posts}.ID = p2p{$joincount}.id1";
+						$join_parts[] = " left join {$wpdb->prefix}acm_post_to_post as p2p{$joincount} on {$wpdb->posts}.ID = p2p{$joincount}.id1";
 
 						// Track that we've joined the p2p table
 						$this->p2p_join = true;

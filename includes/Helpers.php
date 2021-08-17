@@ -1,15 +1,15 @@
 <?php
 
-namespace TenUp\ContentConnect\Helpers;
+namespace WPE\AtlasContentModeler\ContentConnect\Helpers;
 
-use TenUp\ContentConnect\Plugin;
+use WPE\AtlasContentModeler\ContentConnect\Plugin;
 
 if ( ! function_exists( __NAMESPACE__ . '\get_registry' ) ) :
 
 	/**
 	 * Returns the instance of the relationship registry
 	 *
-	 * @return \TenUp\ContentConnect\Registry
+	 * @return \WPE\AtlasContentModeler\ContentConnect\Registry
 	 */
 	function get_registry() {
 		return Plugin::instance()->registry;
@@ -31,7 +31,7 @@ if ( ! function_exists( __NAMESPACE__ . '\get_related_ids_by_name' ) ) :
 	 * @return Array IDs of posts related to the post with the named relationship
 	 */
 	function get_related_ids_by_name( $post_id, $relationship_name ) {
-		/** @var \TenUp\ContentConnect\Tables\PostToPost $table */
+		/** @var \WPE\AtlasContentModeler\ContentConnect\Tables\PostToPost $table */
 		$table = Plugin::instance()->get_table( 'p2p' );
 		$db = $table->get_db();
 

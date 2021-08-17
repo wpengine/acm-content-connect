@@ -1,6 +1,6 @@
 <?php
 
-namespace TenUp\ContentConnect\Relationships;
+namespace WPE\AtlasContentModeler\ContentConnect\Relationships;
 
 abstract class Relationship {
 

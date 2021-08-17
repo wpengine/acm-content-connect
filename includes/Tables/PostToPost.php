@@ -1,19 +1,19 @@
 <?php
 
-namespace TenUp\ContentConnect\Tables;
+namespace WPE\AtlasContentModeler\ContentConnect\Tables;
 
 class PostToPost extends BaseTable {
 
 	function get_schema_version() {
-		return '0.1.10';
+		return '0.1.0';
 	}
 
 	function get_table_name() {
-		return $this->generate_table_name( 'post_to_post');
+		return $this->generate_table_name( 'acm_post_to_post');
 	}
 
 	/**
-	 * Defines the post_to_post table schema
+	 * Defines the acm_post_to_post table schema.
 	 *
 	 * Indexes:
 	 *  id1_id2_name - Used to ensure no duplicates are created

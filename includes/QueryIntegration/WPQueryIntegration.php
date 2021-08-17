@@ -1,8 +1,8 @@
 <?php
 
-namespace TenUp\ContentConnect\QueryIntegration;
+namespace WPE\AtlasContentModeler\ContentConnect\QueryIntegration;
 
-use TenUp\ContentConnect\Relationships\PostToPost;
+use WPE\AtlasContentModeler\ContentConnect\Relationships\PostToPost;
 
 class WPQueryIntegration {
 
@@ -15,21 +15,21 @@ class WPQueryIntegration {
 	}
 
 	public function posts_where( $where, $query ) {
-		if ( isset( $query->query_vars['relationship_query'] ) ) {
+		if ( isset( $query->query_vars['acm_relationship_query'] ) ) {
 			$post_type = isset( $query->query_vars['post_type'] ) ? $query->query_vars['post_type'] : '';
 
 			// Adding to the query, so that we can fetch it from the other filter methods below and be dealing with the same data
-			$query->relationship_query = new RelationshipQuery( $query->query_vars['relationship_query'], $post_type );
+			$query->acm_relationship_query = new RelationshipQuery( $query->query_vars['acm_relationship_query'], $post_type );
 
-			$where .= $query->relationship_query->where;
+			$where .= $query->acm_relationship_query->where;
 		}
 
 		return $where;
 	}
 
 	public function posts_join( $join, $query ) {
-		if ( isset( $query->relationship_query ) ) {
-			$join .= $query->relationship_query->join;
+		if ( isset( $query->acm_relationship_query ) ) {
+			$join .= $query->acm_relationship_query->join;
 		}
 
 		return $join;
@@ -38,7 +38,7 @@ class WPQueryIntegration {
 	public function posts_groupby( $groupby, $query ) {
 		global $wpdb;
 
-		if ( isset( $query->relationship_query ) && ! empty( $query->relationship_query->where ) ) {
+		if ( isset( $query->acm_relationship_query ) && ! empty( $query->acm_relationship_query->where ) ) {
 			$groupby = "{$wpdb->posts}.ID";
 		}
 
@@ -46,7 +46,7 @@ class WPQueryIntegration {
 	}
 
 	public function posts_orderby( $orderby, $query ) {
-		if ( ! isset( $query->relationship_query ) || empty( $query->relationship_query->where ) ) {
+		if ( ! isset( $query->acm_relationship_query ) || empty( $query->acm_relationship_query->where ) ) {
 			return $orderby;
 		}
 
@@ -62,12 +62,12 @@ class WPQueryIntegration {
 		 * Since each component of the relationship query could have its OWN order, and there is not a good way to
 		 * reconcile those, we just don't allow this and default to default ordering on WP_Query
 		 */
-		if ( count( $query->relationship_query->segments ) > 1 ) {
+		if ( count( $query->acm_relationship_query->segments ) > 1 ) {
 			return $orderby;
 		}
 
-		$segment = $query->relationship_query->segments[0];
-		$relationship = $query->relationship_query->get_relationship_for_segment( $segment );
+		$segment = $query->acm_relationship_query->segments[0];
+		$relationship = $query->acm_relationship_query->get_relationship_for_segment( $segment );
 
 		// the order = 0 part puts any zero values (defaults) last to account for cases when they were adding from the
 		// other side of the relationship

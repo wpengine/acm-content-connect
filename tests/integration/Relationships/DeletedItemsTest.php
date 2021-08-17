@@ -1,9 +1,9 @@
 <?php
 
-namespace TenUp\ContentConnect\Tests\Integration\Relationships;
+namespace WPE\AtlasContentModeler\ContentConnect\Tests\Integration\Relationships;
 
-use TenUp\ContentConnect\Relationships\PostToPost;
-use TenUp\ContentConnect\Tests\Integration\ContentConnectTestCase;
+use WPE\AtlasContentModeler\ContentConnect\Relationships\PostToPost;
+use WPE\AtlasContentModeler\ContentConnect\Tests\Integration\ContentConnectTestCase;
 
 class DeletedItemsTest extends ContentConnectTestCase {
 
@@ -11,7 +11,7 @@ class DeletedItemsTest extends ContentConnectTestCase {
 		global $wpdb;
 
 		// Start out with known empty slate
-		$wpdb->query( "delete from {$wpdb->prefix}post_to_post" );
+		$wpdb->query( "delete from {$wpdb->prefix}acm_post_to_post" );
 
 		$wpdb->query( "delete from {$wpdb->posts}" );
 		self::insert_dummy_data();
@@ -29,29 +29,29 @@ class DeletedItemsTest extends ContentConnectTestCase {
 		$relationship = new PostToPost( 'car', 'tire', 'test' );
 
 		// 11 (car) to 21 (tire)
-		$this->assertEquals( 0, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}post_to_post where id1=11;" ) );
-		$this->assertEquals( 0, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}post_to_post where id2=11;" ) );
-		$this->assertEquals( 0, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}post_to_post where id1=21;" ) );
-		$this->assertEquals( 0, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}post_to_post where id2=21;" ) );
+		$this->assertEquals( 0, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}acm_post_to_post where id1=11;" ) );
+		$this->assertEquals( 0, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}acm_post_to_post where id2=11;" ) );
+		$this->assertEquals( 0, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}acm_post_to_post where id1=21;" ) );
+		$this->assertEquals( 0, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}acm_post_to_post where id2=21;" ) );
 
 		$relationship->add_relationship( 11, 21 );
-		$this->assertEquals( 1, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}post_to_post where id1=11;" ) );
-		$this->assertEquals( 1, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}post_to_post where id2=11;" ) );
-		$this->assertEquals( 1, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}post_to_post where id1=21;" ) );
-		$this->assertEquals( 1, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}post_to_post where id2=21;" ) );
+		$this->assertEquals( 1, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}acm_post_to_post where id1=11;" ) );
+		$this->assertEquals( 1, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}acm_post_to_post where id2=11;" ) );
+		$this->assertEquals( 1, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}acm_post_to_post where id1=21;" ) );
+		$this->assertEquals( 1, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}acm_post_to_post where id2=21;" ) );
 
 		// Test that relationships persist when trashing posts (in case they are untrashed)
 		wp_trash_post( 11 );
-		$this->assertEquals( 1, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}post_to_post where id1=11;" ) );
-		$this->assertEquals( 1, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}post_to_post where id2=11;" ) );
-		$this->assertEquals( 1, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}post_to_post where id1=21;" ) );
-		$this->assertEquals( 1, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}post_to_post where id2=21;" ) );
+		$this->assertEquals( 1, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}acm_post_to_post where id1=11;" ) );
+		$this->assertEquals( 1, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}acm_post_to_post where id2=11;" ) );
+		$this->assertEquals( 1, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}acm_post_to_post where id1=21;" ) );
+		$this->assertEquals( 1, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}acm_post_to_post where id2=21;" ) );
 
 		wp_delete_post( 11 );
-		$this->assertEquals( 0, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}post_to_post where id1=11;" ) );
-		$this->assertEquals( 0, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}post_to_post where id2=11;" ) );
-		$this->assertEquals( 0, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}post_to_post where id1=21;" ) );
-		$this->assertEquals( 0, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}post_to_post where id2=21;" ) );
+		$this->assertEquals( 0, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}acm_post_to_post where id1=11;" ) );
+		$this->assertEquals( 0, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}acm_post_to_post where id2=11;" ) );
+		$this->assertEquals( 0, $wpdb->get_var( "select count(id1) from {$wpdb->prefix}acm_post_to_post where id1=21;" ) );
+		$this->assertEquals( 0, $wpdb->get_var( "select count(id2) from {$wpdb->prefix}acm_post_to_post where id2=21;" ) );
 	}
 
 }

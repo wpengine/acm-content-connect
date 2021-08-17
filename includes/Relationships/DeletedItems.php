@@ -1,8 +1,8 @@
 <?php
 
-namespace TenUp\ContentConnect\Relationships;
+namespace WPE\AtlasContentModeler\ContentConnect\Relationships;
 
-use TenUp\ContentConnect\Plugin;
+use WPE\AtlasContentModeler\ContentConnect\Plugin;
 
 class DeletedItems {
 
@@ -16,7 +16,7 @@ class DeletedItems {
 	 * @param $post_id
 	 */
 	public function deleted_post( $post_id ) {
-		/** @var \TenUp\ContentConnect\Tables\PostToPost $p2p_table */
+		/** @var \WPE\AtlasContentModeler\ContentConnect\Tables\PostToPost $p2p_table */
 		$p2p_table = Plugin::instance()->get_table( 'p2p' );
 
 		$p2p_table->delete(

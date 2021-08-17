@@ -1,6 +1,6 @@
 <?php
 
-namespace TenUp\ContentConnect\Tables;
+namespace WPE\AtlasContentModeler\ContentConnect\Tables;
 
 abstract class BaseTable {
 

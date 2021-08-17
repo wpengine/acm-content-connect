@@ -1,9 +1,9 @@
 <?php
 
-namespace TenUp\ContentConnect;
+namespace WPE\AtlasContentModeler\ContentConnect;
 
-use TenUp\ContentConnect\Relationships\PostToPost;
-use TenUp\ContentConnect\Relationships\Relationship;
+use WPE\AtlasContentModeler\ContentConnect\Relationships\PostToPost;
+use WPE\AtlasContentModeler\ContentConnect\Relationships\Relationship;
 
 /**
  * Creates and Tracks any relationships between post types
