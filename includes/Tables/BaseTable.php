@@ -16,7 +16,7 @@ abstract class BaseTable {
 	public $deleted  = 0;
 
 	public function setup() {
-		add_action( 'admin_init', [ $this, 'upgrade' ] );
+		add_action( 'init', [ $this, 'upgrade' ] );
 	}
 
 	/**
@@ -186,4 +186,3 @@ SQL;
 	}
 
 }
-
