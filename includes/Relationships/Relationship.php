@@ -73,7 +73,7 @@ abstract class Relationship {
 		$this->name = $name;
 
 		$defaults = array(
-			'is_bidirectional' => false,
+			'is_bidirectional' => true,
 			'from' => array(
 				'enable_ui' => true,
 				'sortable' => false,
