@@ -8,7 +8,7 @@ class PostToPostTest extends \PHPUnit_Framework_TestCase {
 		global $wpdb;
 
 		// @ suppresses headers already sent errors
-		@do_action( 'admin_init' );
+		@do_action( 'init' );
 
 		$result = $wpdb->query( "SHOW TABLES LIKE '{$wpdb->prefix}acm_post_to_post'" );
 
