@@ -1,0 +1,68 @@
+version: 2.1
+orbs:
+  php: circleci/php@1.1.0
+
+jobs:
+  # plugin-build-composer-dev:
+  #   executor: php/default
+  #   steps:
+  #     - attach_workspace:
+  #         at: .
+  #     - php/install-composer
+  #     - php/install-packages:
+  #         app-dir: <<parameters.slug>>
+  #         install-flags: --no-interaction --prefer-dist --ignore-platform-reqs
+  #     - run:
+  #         name: Remove composer setup file
+  #         command: |
+  #           rm -v composer-setup.php
+  #     - persist_to_workspace:
+  #         root: .
+  #         paths:
+  #           - atlas-content-modeler/vendor
+
+  plugin-test-phpunit:
+    docker:
+      - image: cimg/php:7.4
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_DATABASE: wp_content_connect_tests
+          MYSQL_USER: wp_user
+          MYSQL_PASSWORD: wp_pass
+          MYSQL_ROOT_PASSWORD: password
+    steps:
+      - attach_workspace:
+          at: .
+      - checkout
+      - run:
+          name: Install mysql_client
+          command: |
+            sudo apt-get update -yq && sudo apt-get install default-mysql-client -yq
+      # - run:
+      #     name: Install MySQL PHP extension
+      #     command: sudo docker-php-ext-install mysqli zip pdo_mysql
+      - run:
+          name: Install Subversion package
+          command: |
+            sudo apt-get update -yq
+            sudo apt-get install subversion -yq
+      - run:
+          name: Set up WordPress testing framework
+          command: |
+            /bin/bash bin/install-wp-tests.sh wp_content_connect_tests wp_user wp_pass 127.0.0.1 latest true
+
+      - php/install-composer
+      - php/install-packages
+      - run:
+          name: Run testing suite
+          command: |
+            /bin/bash ./run-tests.sh
+
+workflows:
+  plugin:
+    jobs:
+      - plugin-test-phpunit:
+        # run this job for any build, any branch
+        filters:
+          tags:
+            only: /.*/
