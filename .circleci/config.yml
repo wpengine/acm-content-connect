@@ -3,24 +3,6 @@ orbs:
   php: circleci/php@1.1.0
 
 jobs:
-  # plugin-build-composer-dev:
-  #   executor: php/default
-  #   steps:
-  #     - attach_workspace:
-  #         at: .
-  #     - php/install-composer
-  #     - php/install-packages:
-  #         app-dir: <<parameters.slug>>
-  #         install-flags: --no-interaction --prefer-dist --ignore-platform-reqs
-  #     - run:
-  #         name: Remove composer setup file
-  #         command: |
-  #           rm -v composer-setup.php
-  #     - persist_to_workspace:
-  #         root: .
-  #         paths:
-  #           - atlas-content-modeler/vendor
-
   plugin-test-phpunit:
     docker:
       - image: cimg/php:7.4
@@ -38,9 +20,6 @@ jobs:
           name: Install mysql_client
           command: |
             sudo apt-get update -yq && sudo apt-get install default-mysql-client -yq
-      # - run:
-      #     name: Install MySQL PHP extension
-      #     command: sudo docker-php-ext-install mysqli zip pdo_mysql
       - run:
           name: Install Subversion package
           command: |
